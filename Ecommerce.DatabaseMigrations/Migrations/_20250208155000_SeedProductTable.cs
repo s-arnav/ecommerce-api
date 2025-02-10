@@ -9,6 +9,7 @@ public class _20250208155000_SeedProductTable : Migration
 {
     private static readonly ProductRecord product = new()
         {
+            id = Guid.NewGuid(),
             name = "Sheaffer Taranis",
             description = "Sheaffer's 100th Anniversary Launch",
             quantity = 10,

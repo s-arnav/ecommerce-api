@@ -17,8 +17,8 @@ public class _20250208154000_CreateProductTable : Migration
             .WithColumn("category_id").AsGuid().NotNullable().ForeignKey("FK_Product_Category", Schemas.Ops, OpsTables.Category, "id")
             .WithColumn("is_active").AsBoolean().WithDefaultValue(true).NotNullable()
             .WithColumn("is_deleted").AsBoolean().WithDefaultValue(false).NotNullable()
-            .WithColumn("created_on").AsDateTime().NotNullable()
-            .WithColumn("updated_on").AsDateTime().NotNullable();
+            .WithColumn("created_on").AsDateTime().WithDefaultValue(SystemMethods.CurrentUTCDateTime).NotNullable()
+            .WithColumn("updated_on").AsDateTime().WithDefaultValue(SystemMethods.CurrentUTCDateTime).NotNullable();
         
         Create.ForeignKey()
             .FromTable(OpsTables.Product).InSchema(Schemas.Ops).ForeignColumn("category_id")

@@ -15,8 +15,8 @@ public class _20250208145000_CreateCategoryTable : Migration
             .WithColumn("description").AsString(500)
             .WithColumn("is_active").AsBoolean().WithDefaultValue(true).NotNullable()
             .WithColumn("is_deleted").AsBoolean().WithDefaultValue(false).NotNullable()
-            .WithColumn("created_on").AsDateTime().NotNullable()
-            .WithColumn("updated_on").AsDateTime().NotNullable();
+            .WithColumn("created_on").AsDateTime().WithDefaultValue(SystemMethods.CurrentUTCDateTime).NotNullable()
+            .WithColumn("updated_on").AsDateTime().WithDefaultValue(SystemMethods.CurrentUTCDateTime).NotNullable();
     }
 
     public override void Down()

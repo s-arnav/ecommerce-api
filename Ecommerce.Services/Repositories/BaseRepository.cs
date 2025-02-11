@@ -1,4 +1,5 @@
 using Dapper;
+using Ecommerce.Services.Records;
 using Ecommerce.Services.Utilities;
 using Ecommerce.Services.Utilities.Config;
 using Ecommerce.Services.Utilities.Exceptions;
@@ -9,9 +10,10 @@ namespace Ecommerce.Services.Repositories;
 public interface IBaseRepository
 {
     Task<IEnumerable<T>> GetAll<T>();
-    Task<T> GetById<T>(Guid id);
-    Task<Guid> Insert<T>(T record) where T : class;
-    Task Update<T>(T record) where T : class;
+    Task<T> GetById<T>(Guid id) where T : BaseRecord;
+    Task<Guid> Insert<T>(T record) where T : BaseRecord;
+    Task Update<T>(T record) where T : BaseRecord;
+    Task Delete(Guid id);
 }
 
 public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
@@ -26,7 +28,7 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
         return await connection.QueryAsync<T>(sql);
     }
     
-    public async Task<T> GetById<T>(Guid id)
+    public async Task<T> GetById<T>(Guid id) where T : BaseRecord
     {
         var sql = sqlBuilder.BuildGetByIdSql(SchemaName, TableName);
         await using var connection = CreateConnection();
@@ -40,13 +42,13 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
         return record;
     }
 
-    public async Task<Guid> Insert<T>(T record) where T : class
+    public async Task<Guid> Insert<T>(T record) where T : BaseRecord
     {
-        var sql = sqlBuilder.BuildInsertSql<T>(SchemaName, TableName, "id");
+        var sql = sqlBuilder.BuildInsertSql<T>(SchemaName, TableName, ["id"]);
         await using var connection = CreateConnection();
         var id = await connection.ExecuteScalarAsync<Guid?>(sql, record);
 
-        if (id == null)
+        if (!id.HasValue)
         {
             throw new Exception("Record not inserted");
         }
@@ -54,15 +56,35 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
         return id.Value;
     }
 
-    public async Task Update<T>(T record) where T : class
+    public async Task Update<T>(T record) where T : BaseRecord
     {
-        var sql = sqlBuilder.BuildSimpleUpdateSql<T>(SchemaName, TableName, "id", "created_on", "is_active", "is_deleted");
+        var sql = sqlBuilder.BuildSimpleUpdateSql<T>(SchemaName, TableName, ["id", "created_on", "is_active", "is_deleted"]);
         await using var connection = CreateConnection();
-        var id = await connection.ExecuteScalarAsync<Guid?>(sql, record);
+
+        // Check if a record with the provided id exists
+        await GetById<T>(record.id);
         
-        if (id == null)
+        var updatedRecordId = await connection.ExecuteScalarAsync<Guid?>(sql, record);
+        
+        if (!updatedRecordId.HasValue)
         {
             throw new Exception("Record not updated");
+        }
+    }
+    
+    public async Task Delete(Guid id)
+    {
+        var sql = sqlBuilder.BuildSoftDeleteSql(SchemaName, TableName);
+        await using var connection = CreateConnection();
+
+        // Check if a record with the provided id exists
+        await GetById<BaseRecord>(id);
+        
+        var deletedRecordId = await connection.ExecuteScalarAsync<Guid?>(sql, new { id, updated_on = DateTime.UtcNow });
+        
+        if (!deletedRecordId.HasValue)
+        {
+            throw new Exception("Record not deleted");
         }
     }
 

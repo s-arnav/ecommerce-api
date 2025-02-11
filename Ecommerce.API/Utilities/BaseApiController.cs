@@ -20,12 +20,19 @@ public abstract class BaseApiController : ControllerBase
         catch (ValidationAggregateException e)
         {
             Console.WriteLine("AggregateException: {0}", e.Message);
-            return BadRequest(new ApiResponse<T>(false, e.Message, default, e.InnerExceptions.Select(inner => inner.Message)));
+            return BadRequest(new ApiResponse<T>(false, e.Message, default,
+                e.InnerExceptions.Select(inner => inner.Message)));
         }
         catch (RecordNotFoundException e)
         {
             Console.WriteLine("Error: {0}", e.Message);
             return NotFound(new ApiResponse<T>(false, e.Message, default, [e.Message]));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("General Server Error: {0}", e.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                new ApiResponse<T>(false, $"{e.GetType()}: {e.Message}", default, [e.Message]));
         }
     }
     
@@ -41,6 +48,12 @@ public abstract class BaseApiController : ControllerBase
         {
             Console.WriteLine("AggregateException: {0}", e.Message);
             return BadRequest(new ApiResponse<T>(false, e.Message, default, e.InnerExceptions.Select(inner => inner.Message)));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("General Server Error: {0}", e.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                new ApiResponse<T>(false, $"{e.GetType()}: {e.Message}", default, [e.Message]));
         }
     }
 }

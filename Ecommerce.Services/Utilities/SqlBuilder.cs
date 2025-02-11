@@ -6,9 +6,9 @@ public interface ISqlBuilder
 {
     string BuildGetAllSql(string schemaName, string tableName);
     string BuildGetByIdSql(string schemaName, string tableName);
-    string BuildInsertSql<T>(string schemaName, string tableName, params string[] fieldsToIgnore) where T : class;
-    string BuildSimpleUpdateSql<T>(string schemaName, string tableName, params string[] fieldsToIgnore) where T : class;
-
+    string BuildInsertSql<T>(string schemaName, string tableName, string[] fieldsToIgnore) where T : class;
+    string BuildSimpleUpdateSql<T>(string schemaName, string tableName, string[] fieldsToIgnore) where T : class;
+    string BuildSoftDeleteSql(string schemaName, string tableName);
 }
 
 public class SqlBuilder : ISqlBuilder
@@ -23,7 +23,7 @@ public class SqlBuilder : ISqlBuilder
         return $"SELECT * FROM {schemaName}.{tableName} WHERE id = @id";
     }
 
-    public string BuildInsertSql<T>(string schemaName, string tableName, params string[] fieldsToIgnore) where T : class
+    public string BuildInsertSql<T>(string schemaName, string tableName, string[] fieldsToIgnore) where T : class
     {
         var fields =  typeof(T).GetProperties().Select(x => x.Name).Where(x => !fieldsToIgnore.Contains(x.ToLower())).ToList();
         var values = fields.Select(x => $"@{x}");
@@ -34,7 +34,7 @@ public class SqlBuilder : ISqlBuilder
         return $"INSERT INTO {schemaName}.{tableName} ({fieldsString}) VALUES ({valuesString}) RETURNING id";
     }
 
-    public string BuildSimpleUpdateSql<T>(string schemaName, string tableName, params string[] fieldsToIgnore) where T : class
+    public string BuildSimpleUpdateSql<T>(string schemaName, string tableName, string[] fieldsToIgnore) where T : class
     {
         var fields =  typeof(T).GetProperties().Select(x => x.Name).Where(x => !fieldsToIgnore.Contains(x.ToLower())).ToList();
         var values = fields.Select(x => $"{x} = @{x}");
@@ -42,5 +42,10 @@ public class SqlBuilder : ISqlBuilder
         var valuesString = string.Join(", ", values);
 
         return $"UPDATE {schemaName}.{tableName} SET {valuesString} WHERE id = @id RETURNING id";
+    }
+
+    public string BuildSoftDeleteSql(string schemaName, string tableName)
+    {
+        return $"UPDATE {schemaName}.{tableName} SET is_active = false, is_deleted = true, updated_on = @updated_on WHERE id = @id RETURNING id";
     }
 }

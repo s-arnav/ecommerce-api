@@ -12,6 +12,7 @@ public interface ICategoryService
     Task<CategoryDto> GetCategoryById(Guid id);
     Task<CategoryDto> CreateCategory(CategoryDto categoryDto);
     Task<CategoryDto> UpdateCategory(CategoryDto categoryDto);
+    Task<CategoryDto> DeleteCategory(Guid id);
 }
 
 public class CategoryService(ICategoryRepository categoryRepository) : ICategoryService
@@ -38,7 +39,8 @@ public class CategoryService(ICategoryRepository categoryRepository) : ICategory
     {
         Validation.Begin()
             .IsNotNullOrEmptyString(categoryDto.Name, nameof(categoryDto.Name))
-            .IsNotNullOrEmptyString(categoryDto.Description, nameof(categoryDto.Description));
+            .IsNotNullOrEmptyString(categoryDto.Description, nameof(categoryDto.Description))
+            .Check();
         
         var categoryId = await categoryRepository.CreateCategory(new CategoryRecord { name = categoryDto.Name, description = categoryDto.Description });
         
@@ -49,10 +51,20 @@ public class CategoryService(ICategoryRepository categoryRepository) : ICategory
     {
         Validation.Begin()
             .IsNotNullOrEmptyString(categoryDto.Name, nameof(categoryDto.Name))
-            .IsNotNullOrEmptyString(categoryDto.Description, nameof(categoryDto.Description));
+            .IsNotNullOrEmptyString(categoryDto.Description, nameof(categoryDto.Description))
+            .Check();
         
         var categoryId = await categoryRepository.UpdateCategory(new CategoryRecord { id = categoryDto.Id, name = categoryDto.Name, description = categoryDto.Description });
         
         return new CategoryDto { Id = categoryId, Name = categoryDto.Name, Description = categoryDto.Description };
+    }
+    
+    public async Task<CategoryDto> DeleteCategory(Guid id)
+    {
+        Validation.Begin().IsValidId(id, nameof(id)).Check();
+        
+        var categoryId = await categoryRepository.DeleteCategory(id);
+
+        return new CategoryDto { Id = categoryId, };
     }
 }

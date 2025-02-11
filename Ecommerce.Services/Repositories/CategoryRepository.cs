@@ -10,6 +10,7 @@ public interface ICategoryRepository
     Task<CategoryRecord> GetCategoryById(Guid id);
     Task<Guid> CreateCategory(CategoryRecord category);
     Task<Guid> UpdateCategory(CategoryRecord categoryRecord);
+    Task<Guid> DeleteCategory(Guid id);
 }
 
 public class CategoryRepository(ISqlBuilder sqlBuilder) : BaseRepository(sqlBuilder), ICategoryRepository
@@ -27,5 +28,11 @@ public class CategoryRepository(ISqlBuilder sqlBuilder) : BaseRepository(sqlBuil
     {
         await Update(categoryRecord);
         return categoryRecord.id;
+    }
+    
+    public async Task<Guid> DeleteCategory(Guid id)
+    {
+        await Delete(id);
+        return id;
     }
 }

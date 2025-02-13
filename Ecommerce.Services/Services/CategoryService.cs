@@ -1,70 +1,64 @@
-using Ecommerce.Services.Dtos;
-using Ecommerce.Services.Records;
 using Ecommerce.Services.Repositories;
-using Ecommerce.Services.Utilities.Exceptions;
+using Ecommerce.Services.RequestDtos;
+using Ecommerce.Services.ResponseDtos;
+using Ecommerce.Services.Utilities.Extensions.Records;
+using Ecommerce.Services.Utilities.Extensions.Requests;
+using Ecommerce.Services.Utilities.Extensions.Validations;
 using Ecommerce.Services.Utilities.Validations;
 
 namespace Ecommerce.Services.Services;
 
 public interface ICategoryService
 {
-    Task<IEnumerable<CategoryDto>> GetAllCategories();
-    Task<CategoryDto> GetCategoryById(Guid id);
-    Task<CategoryDto> CreateCategory(CategoryDto categoryDto);
-    Task<CategoryDto> UpdateCategory(CategoryDto categoryDto);
-    Task<CategoryDto> DeleteCategory(Guid id);
+    Task<IEnumerable<CategoryResponse>> GetAllCategories();
+    Task<CategoryResponse> GetCategoryById(Guid id);
+    Task<CategoryResponse> CreateCategory(CreateCategoryRequest category);
+    Task<CategoryResponse> UpdateCategory(UpdateCategoryRequest category);
+    Task<CategoryResponse> DeleteCategory(Guid id);
 }
 
 public class CategoryService(ICategoryRepository categoryRepository) : ICategoryService
 {
-    public async Task<IEnumerable<CategoryDto>> GetAllCategories()
+    public async Task<IEnumerable<CategoryResponse>> GetAllCategories()
     {
         var categories = await categoryRepository.GetAllCategories();
 
-        return categories.Select(x => new CategoryDto { Id = x.id, Name = x.name, Description = x.description });
+        return categories.Select(category => category.ToResponse());
     }
     
-    public async Task<CategoryDto> GetCategoryById(Guid id)
+    public async Task<CategoryResponse> GetCategoryById(Guid id)
     {
         Validation.Begin().IsValidId(id, nameof(id));
         
         var category = await categoryRepository.GetCategoryById(id);
         
-        if (category == null) throw new RecordNotFoundException("Category not found");
-
-        return new CategoryDto { Id = category.id, Name = category.name, Description = category.description };
+        return category.ToResponse();
     }
 
-    public async Task<CategoryDto> CreateCategory(CategoryDto categoryDto)
+    public async Task<CategoryResponse> CreateCategory(CreateCategoryRequest category)
     {
-        Validation.Begin()
-            .IsNotNullOrEmptyString(categoryDto.Name, nameof(categoryDto.Name))
-            .IsNotNullOrEmptyString(categoryDto.Description, nameof(categoryDto.Description))
-            .Check();
+        category.ValidateCreateCategoryRequest();
         
-        var categoryId = await categoryRepository.CreateCategory(new CategoryRecord { name = categoryDto.Name, description = categoryDto.Description });
+        var createdCategory = await categoryRepository.CreateCategory(category.ToCreateRecord());
         
-        return new CategoryDto { Id = categoryId, Name = categoryDto.Name, Description = categoryDto.Description };
+        return createdCategory.ToResponse();
     }
 
-    public async Task<CategoryDto> UpdateCategory(CategoryDto categoryDto)
+    public async Task<CategoryResponse> UpdateCategory(UpdateCategoryRequest category)
     {
-        Validation.Begin()
-            .IsNotNullOrEmptyString(categoryDto.Name, nameof(categoryDto.Name))
-            .IsNotNullOrEmptyString(categoryDto.Description, nameof(categoryDto.Description))
-            .Check();
+        category.ValidateUpdateCategoryRequest();
         
-        var categoryId = await categoryRepository.UpdateCategory(new CategoryRecord { id = categoryDto.Id, name = categoryDto.Name, description = categoryDto.Description });
+        var updatedCategory = await categoryRepository.UpdateCategory(category.ToUpdateRecord());
         
-        return new CategoryDto { Id = categoryId, Name = categoryDto.Name, Description = categoryDto.Description };
+        return updatedCategory.ToResponse();
     }
     
-    public async Task<CategoryDto> DeleteCategory(Guid id)
+    public async Task<CategoryResponse> DeleteCategory(Guid id)
     {
         Validation.Begin().IsValidId(id, nameof(id)).Check();
         
-        var categoryId = await categoryRepository.DeleteCategory(id);
+        var deletedCategory = await categoryRepository.DeleteCategory(id);
 
-        return new CategoryDto { Id = categoryId, };
+        return deletedCategory.ToResponse();
     }
 }

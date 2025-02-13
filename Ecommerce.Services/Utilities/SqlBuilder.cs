@@ -1,5 +1,3 @@
-using Ecommerce.Services.Records;
-
 namespace Ecommerce.Services.Utilities;
 
 public interface ISqlBuilder
@@ -31,7 +29,7 @@ public class SqlBuilder : ISqlBuilder
         var fieldsString = string.Join(", ", fields);
         var valuesString = string.Join(", ", values);
 
-        return $"INSERT INTO {schemaName}.{tableName} ({fieldsString}) VALUES ({valuesString}) RETURNING id";
+        return $"INSERT INTO {schemaName}.{tableName} ({fieldsString}) VALUES ({valuesString}) RETURNING *";
     }
 
     public string BuildSimpleUpdateSql<T>(string schemaName, string tableName, string[] fieldsToIgnore) where T : class
@@ -41,11 +39,11 @@ public class SqlBuilder : ISqlBuilder
 
         var valuesString = string.Join(", ", values);
 
-        return $"UPDATE {schemaName}.{tableName} SET {valuesString} WHERE id = @id RETURNING id";
+        return $"UPDATE {schemaName}.{tableName} SET {valuesString} WHERE id = @id RETURNING *";
     }
 
     public string BuildSoftDeleteSql(string schemaName, string tableName)
     {
-        return $"UPDATE {schemaName}.{tableName} SET is_active = false, is_deleted = true, updated_on = @updated_on WHERE id = @id RETURNING id";
+        return $"UPDATE {schemaName}.{tableName} SET is_active = false, is_deleted = true, updated_on = @updated_on WHERE id = @id RETURNING *";
     }
 }

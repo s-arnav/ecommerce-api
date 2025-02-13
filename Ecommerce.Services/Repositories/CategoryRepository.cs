@@ -8,9 +8,9 @@ public interface ICategoryRepository
 {
     Task<IEnumerable<CategoryRecord>> GetAllCategories();
     Task<CategoryRecord> GetCategoryById(Guid id);
-    Task<Guid> CreateCategory(CategoryRecord category);
-    Task<Guid> UpdateCategory(CategoryRecord categoryRecord);
-    Task<Guid> DeleteCategory(Guid id);
+    Task<CategoryRecord> CreateCategory(CategoryRecord category);
+    Task<CategoryRecord> UpdateCategory(CategoryRecord categoryRecord);
+    Task<CategoryRecord> DeleteCategory(Guid id);
 }
 
 public class CategoryRepository(ISqlBuilder sqlBuilder) : BaseRepository(sqlBuilder), ICategoryRepository
@@ -22,17 +22,9 @@ public class CategoryRepository(ISqlBuilder sqlBuilder) : BaseRepository(sqlBuil
 
     public async Task<CategoryRecord> GetCategoryById(Guid id) => await GetById<CategoryRecord>(id);
 
-    public async Task<Guid> CreateCategory(CategoryRecord categoryRecord) => await Insert(categoryRecord);
+    public async Task<CategoryRecord> CreateCategory(CategoryRecord categoryRecord) => await Insert(categoryRecord);
 
-    public async Task<Guid> UpdateCategory(CategoryRecord categoryRecord)
-    {
-        await Update(categoryRecord);
-        return categoryRecord.id;
-    }
+    public async Task<CategoryRecord> UpdateCategory(CategoryRecord categoryRecord) => await Update(categoryRecord);
     
-    public async Task<Guid> DeleteCategory(Guid id)
-    {
-        await Delete(id);
-        return id;
-    }
+    public async Task<CategoryRecord> DeleteCategory(Guid id) => await Delete<CategoryRecord>(id);
 }

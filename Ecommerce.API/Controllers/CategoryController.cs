@@ -1,5 +1,5 @@
 using Ecommerce.API.Utilities;
-using Ecommerce.Services.Dtos;
+using Ecommerce.Services.RequestDtos;
 using Ecommerce.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,20 +15,26 @@ public class CategoryController(ICategoryService categoryService) : BaseApiContr
     }
     
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetAllCategories(Guid id)
+    public async Task<IActionResult> GetCategory(Guid id)
     {
         return await ExecuteReadOrUpdateAsync(() => categoryService.GetCategoryById(id));
     }
     
     [HttpPost]
-    public async Task<IActionResult> CreateCategory(CategoryDto categoryDto)
+    public async Task<IActionResult> CreateCategory(CreateCategoryRequest categoryRequest)
     {
-        return await ExecuteCreateAsync(() => categoryService.CreateCategory(categoryDto));
+        return await ExecuteCreateAsync(() => categoryService.CreateCategory(categoryRequest));
     }
     
     [HttpPut]
-    public async Task<IActionResult> UpdateCategory(CategoryDto categoryDto)
+    public async Task<IActionResult> UpdateCategory(UpdateCategoryRequest categoryRequest)
     {
-        return await ExecuteCreateAsync(() => categoryService.UpdateCategory(categoryDto));
+        return await ExecuteReadOrUpdateAsync(() => categoryService.UpdateCategory(categoryRequest));
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteCategory(Guid id)
+    {
+        return await ExecuteReadOrUpdateAsync(() => categoryService.DeleteCategory(id));
     }
 }

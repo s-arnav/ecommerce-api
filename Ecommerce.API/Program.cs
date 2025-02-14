@@ -1,9 +1,11 @@
 using Ecommerce.Services;
+using ServiceAppStartup = Ecommerce.Services.AppStartup;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-AppStartup.ConfigureServices(builder.Services);
+ServiceAppStartup.ConfigureServices(builder.Services);
+ServiceAppStartup.InitializeLogging();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

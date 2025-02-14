@@ -1,5 +1,7 @@
 using Ecommerce.API.Utilities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Shouldly;
 
 namespace Ecommerce.Tests.TestExtensions;
 
@@ -24,10 +26,10 @@ public static class ControllerResponseExtensions
         var response = actionResult.ToApiResponse<T>();
         Assert.Multiple(() =>
         {
-            Assert.That(response.Success, Is.False);
-            Assert.That(response.Data, Is.Null);
-            Assert.That(actionResult.GetResponseStatusCode(), Is.EqualTo(expectedStatusCode));
-            Assert.That(response.Errors, Is.Not.Empty);
+            response.Success.ShouldBeFalse();
+            response.Data.ShouldBeNull();
+            actionResult.GetResponseStatusCode().ShouldBe(expectedStatusCode);
+            response.Errors.ShouldNotBeEmpty();
         });
     }
 
@@ -36,10 +38,10 @@ public static class ControllerResponseExtensions
         var response = actionResult.ToApiResponse<T>();
         Assert.Multiple(() =>
         {
-            Assert.That(response.Success, Is.True);
-            Assert.That(response.Data, Is.EqualTo(expectedResponse));
-            Assert.That(actionResult.GetResponseStatusCode(), Is.AnyOf(200, 201));
-            Assert.That(response.Errors, Is.Empty);
+            response.Success.ShouldBeTrue();
+            response.Data.ShouldBe(expectedResponse);
+            actionResult.GetResponseStatusCode().ShouldBeOneOf(StatusCodes.Status200OK, StatusCodes.Status201Created);
+            response.Errors.ShouldBeEmpty();
         });
     }
 }

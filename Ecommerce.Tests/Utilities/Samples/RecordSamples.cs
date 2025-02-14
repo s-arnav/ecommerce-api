@@ -1,7 +1,7 @@
 using Ecommerce.Services.Records;
 using Tynamix.ObjectFiller;
 
-namespace Ecommerce.Tests.Utilities;
+namespace Ecommerce.Tests.Utilities.Samples;
 
 public static class RecordSamples
 {

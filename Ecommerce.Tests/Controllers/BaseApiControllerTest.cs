@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using Ecommerce.API.Utilities;
 using Ecommerce.Services.Utilities.Exceptions;
 using Ecommerce.Tests.TestExtensions;
+using Ecommerce.Tests.Utilities.Samples;
+using Ecommerce.Tests.Utilities.Types;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,34 +16,39 @@ public class BaseApiControllerTest
     [Test]
     public async Task ExecuteReadOrUpdateAsyncShouldReturnOk()
     {
-        var param = new { };
-        var result = await baseApiController.TestExecuteReadOrUpdateAsync(() => Task.FromResult(param));
-        Assert.That(result.GetResponseStatusCode(), Is.EqualTo(StatusCodes.Status200OK));
+        var response = ResponseDtoSamples.TestResponse;
+        var result = await baseApiController.TestExecuteReadOrUpdateAsync(() => Task.FromResult(response));
+        result.AssertSuccessResponse(response);
     }
 
     [Test]
     public async Task ExecuteReadOrUpdateAsyncShouldFailWhenNotFound()
     {
-        var param = new { };
-        var result = await baseApiController.TestExecuteReadOrUpdateAsync(() =>
-            Task.FromException<RecordNotFoundException>(new RecordNotFoundException()));
-        Assert.That(result.GetResponseStatusCode(), Is.EqualTo(StatusCodes.Status404NotFound));
+        var result = await baseApiController.TestExecuteReadOrUpdateAsync<TestDto>(() => throw new RecordNotFoundException());
+        result.AssertFailureResponse<TestDto>(StatusCodes.Status404NotFound);
     }
 
     [Test]
     public async Task ExecuteCreateAsyncShouldReturnOk()
     {
-        var param = new { };
-        var result = await baseApiController.TestExecuteCreateAsync(() => Task.FromResult(param));
-        Assert.That(result.GetResponseStatusCode(), Is.EqualTo(StatusCodes.Status201Created));
+        var response = ResponseDtoSamples.TestResponse;
+        var result = await baseApiController.TestExecuteCreateAsync(() => Task.FromResult(response));
+        result.AssertSuccessResponse(response);
     }
 
     [Test]
     public async Task ExecuteCreateAsyncShouldFailWhenInvalidInput()
     {
-        var result = await baseApiController.TestExecuteCreateAsync(() =>
-            Task.FromException<ValidationAggregateException>(new ValidationAggregateException([new ValidationException("some invalid field")])));
-        Assert.That(result.GetResponseStatusCode(), Is.EqualTo(StatusCodes.Status400BadRequest));
+        var result = await baseApiController.TestExecuteCreateAsync<TestDto>(
+            () => throw new ValidationAggregateException([new ValidationException("some invalid field")]));
+        result.AssertFailureResponse<TestDto>(StatusCodes.Status400BadRequest);
+    }
+    
+    [Test]
+    public async Task ExecuteCreateAsyncShouldFailWhenUnknownError()
+    {
+        var result = await baseApiController.TestExecuteCreateAsync<TestDto>(() => throw new Exception("Something went wrong"));
+        result.AssertFailureResponse<TestDto>(StatusCodes.Status500InternalServerError);
     }
 
     private class BaseApiControllerConcrete : BaseApiController

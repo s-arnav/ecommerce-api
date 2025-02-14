@@ -4,7 +4,7 @@ using Ecommerce.Services.ResponseDtos;
 using Ecommerce.Services.Services;
 using Ecommerce.Services.Utilities.Exceptions;
 using Ecommerce.Tests.TestExtensions;
-using Ecommerce.Tests.Utilities;
+using Ecommerce.Tests.Utilities.Samples;
 using Microsoft.AspNetCore.Http;
 using Moq;
 

@@ -21,13 +21,13 @@ public class CategoryController(ICategoryService categoryService) : BaseApiContr
     }
     
     [HttpPost]
-    public async Task<IActionResult> CreateCategory(CreateCategoryRequest categoryRequest)
+    public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequest categoryRequest)
     {
         return await ExecuteCreateAsync(() => categoryService.CreateCategory(categoryRequest));
     }
     
     [HttpPut]
-    public async Task<IActionResult> UpdateCategory(UpdateCategoryRequest categoryRequest)
+    public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryRequest categoryRequest)
     {
         return await ExecuteReadOrUpdateAsync(() => categoryService.UpdateCategory(categoryRequest));
     }

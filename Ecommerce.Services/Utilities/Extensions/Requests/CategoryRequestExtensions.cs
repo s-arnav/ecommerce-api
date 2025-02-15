@@ -17,6 +17,7 @@ public static class CategoryRequestExtensions
         {
             id = request.Id,
             name = request.Name,
-            description = request.Description
+            description = request.Description,
+            is_active = request.IsActive
         };
 }

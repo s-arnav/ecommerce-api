@@ -1,4 +1,3 @@
-using Ecommerce.Services;
 using ServiceAppStartup = Ecommerce.Services.AppStartup;
 
 var builder = WebApplication.CreateBuilder(args);

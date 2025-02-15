@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.API", "Ecommerce.API\Ecommerce.API.csproj", "{8B924D65-3493-4F64-BE43-D65776971359}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Api.Rest", "Ecommerce.Api.Rest\Ecommerce.Api.Rest.csproj", "{8B924D65-3493-4F64-BE43-D65776971359}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Services", "Ecommerce.Services\Ecommerce.Services.csproj", "{D366FDE3-BDBA-4FC2-9F19-F7E03F7AF61C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.DatabaseMigrations", "Ecommerce.DatabaseMigrations\Ecommerce.DatabaseMigrations.csproj", "{4C7F6BF6-AB75-4760-B5B6-7275A2AFB220}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Tests", "Ecommerce.Tests\Ecommerce.Tests.csproj", "{D8BF34D4-CC38-4C4F-A403-F3D888EF79B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Api.GraphQL", "Ecommerce.Api.GraphQL\Ecommerce.Api.GraphQL.csproj", "{7EF37EF9-F3F6-4F29-9DED-A543B7E1C580}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,5 +38,9 @@ Global
 		{D8BF34D4-CC38-4C4F-A403-F3D888EF79B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8BF34D4-CC38-4C4F-A403-F3D888EF79B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8BF34D4-CC38-4C4F-A403-F3D888EF79B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EF37EF9-F3F6-4F29-9DED-A543B7E1C580}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EF37EF9-F3F6-4F29-9DED-A543B7E1C580}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EF37EF9-F3F6-4F29-9DED-A543B7E1C580}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EF37EF9-F3F6-4F29-9DED-A543B7E1C580}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,4 +1,4 @@
-namespace Ecommerce.API.Utilities;
+namespace Ecommerce.Api.Rest.Utilities;
 
 public class ApiResponse<T>(bool success, string message, T? data, IEnumerable<string>? errors = null) where T : class
 {

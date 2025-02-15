@@ -1,4 +1,4 @@
-using Ecommerce.API.Utilities;
+using Ecommerce.Api.Rest.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shouldly;

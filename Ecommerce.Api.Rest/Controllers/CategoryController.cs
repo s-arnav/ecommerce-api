@@ -1,9 +1,9 @@
-using Ecommerce.API.Utilities;
+using Ecommerce.Api.Rest.Utilities;
 using Ecommerce.Services.RequestDtos;
 using Ecommerce.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Ecommerce.API.Controllers;
+namespace Ecommerce.Api.Rest.Controllers;
 
 [Route("api/categories")]
 public class CategoryController(ICategoryService categoryService) : BaseApiController

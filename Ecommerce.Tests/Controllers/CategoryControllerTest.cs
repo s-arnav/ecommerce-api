@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Ecommerce.API.Controllers;
+using Ecommerce.Api.Rest.Controllers;
 using Ecommerce.Services.ResponseDtos;
 using Ecommerce.Services.Services;
 using Ecommerce.Services.Utilities.Exceptions;

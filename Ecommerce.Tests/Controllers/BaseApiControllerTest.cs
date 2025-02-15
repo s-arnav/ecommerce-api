@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Ecommerce.API.Controllers;
+using Ecommerce.Api.Rest.Controllers;
 using Ecommerce.Services.Utilities.Exceptions;
 using Ecommerce.Tests.TestExtensions;
 using Ecommerce.Tests.Utilities.Samples;

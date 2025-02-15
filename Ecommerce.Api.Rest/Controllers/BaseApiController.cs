@@ -1,10 +1,10 @@
 using System.Runtime.CompilerServices;
-using Ecommerce.API.Utilities;
+using Ecommerce.Api.Rest.Utilities;
 using Ecommerce.Services.Utilities.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
-namespace Ecommerce.API.Controllers;
+namespace Ecommerce.Api.Rest.Controllers;
 
 [ApiController]
 [Produces("application/json")]

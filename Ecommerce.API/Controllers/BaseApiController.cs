@@ -1,9 +1,10 @@
 using System.Runtime.CompilerServices;
+using Ecommerce.API.Utilities;
 using Ecommerce.Services.Utilities.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
-namespace Ecommerce.API.Utilities;
+namespace Ecommerce.API.Controllers;
 
 [ApiController]
 [Produces("application/json")]
@@ -20,7 +21,6 @@ public abstract class BaseApiController : ControllerBase
         catch (ValidationAggregateException e)
         {
             Log.Error(e, "Validation Error: {message}", e.Message);
-            Console.WriteLine("AggregateException: {0}", e.Message);
             return BadRequest(new ApiResponse<TResponse>(false, e.Message, null,
                 e.InnerExceptions.Select(inner => inner.Message)));
         }

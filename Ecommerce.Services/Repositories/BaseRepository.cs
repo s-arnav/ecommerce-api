@@ -39,7 +39,7 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
 
         if (record == null)
         {
-            throw new RecordNotFoundException($"No record found for id: {id}");
+            throw new RecordNotFoundException($"No record found for id: '{id}'");
         }
         
         return record;
@@ -65,14 +65,11 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
         var sql = sqlBuilder.BuildSimpleUpdateSql<T>(SchemaName, TableName, ["id", "created_on", "is_deleted"]);
         await using var connection = CreateConnection();
         
-        // Check if a record with the provided id exists
-        await GetById<T>(record.id);
-        
         var updatedRecord = await connection.QueryFirstOrDefaultAsync<T>(sql, record);
         
         if (updatedRecord == null)
         {
-            throw new Exception("Record not updated");
+            throw new RecordNotFoundException($"No record found for id: '{record.id}'");
         }
         
         return updatedRecord;
@@ -83,14 +80,11 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
         var sql = sqlBuilder.BuildSoftDeleteSql(SchemaName, TableName);
         await using var connection = CreateConnection();
         
-        // Check if a record with the provided id exists
-        await GetById<BaseRecord>(id);
-        
         var deletedRecord = await connection.QueryFirstOrDefaultAsync<T>(sql, new { id, updated_on = DateTime.UtcNow });
         
         if (deletedRecord == null)
         {
-            throw new Exception("Record not deleted");
+            throw new Exception($"No record found for id: '{id}'");
         }
         
         return deletedRecord;

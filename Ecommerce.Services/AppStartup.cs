@@ -12,10 +12,10 @@ public static class AppStartup
     {
         // services
         services.AddSingleton<ISqlBuilder, SqlBuilder>();
-        services.AddTransient<ICategoryService, CategoryService>();
+        services.AddSingleton<ICategoryService, CategoryService>();
         
         // repositories
-        services.AddTransient<ICategoryRepository, CategoryRepository>();
+        services.AddSingleton<ICategoryRepository, CategoryRepository>();
     }
 
     public static void InitializeLogging()

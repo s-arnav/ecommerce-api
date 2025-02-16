@@ -1,39 +1,28 @@
 using Dapper;
 using Ecommerce.Services.Records;
 using Ecommerce.Services.Utilities;
-using Ecommerce.Services.Utilities.Config;
 using Ecommerce.Services.Utilities.Exceptions;
-using Npgsql;
-using Serilog;
+using Ecommerce.Services.Utilities.Providers;
 
 namespace Ecommerce.Services.Repositories;
 
-public interface IBaseRepository
+public abstract class BaseRepository(ISqlBuilder sqlBuilder, IDbConnectionProvider dbConnectionProvider)
 {
-    Task<IEnumerable<T>> GetAll<T>();
-    Task<T> GetById<T>(Guid id) where T : BaseRecord;
-    Task<T> Insert<T>(T record) where T : BaseRecord;
-    Task<T> Update<T>(T record) where T : BaseRecord;
-    Task<T> Delete<T>(Guid id) where T : BaseRecord;
-}
-
-public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
-{
-    protected virtual string SchemaName { get; set; } = "";
-    protected virtual string TableName { get; set; } = "";
+    protected virtual string SchemaName => "";
+    protected virtual string TableName => "";
     
     public async Task<IEnumerable<T>> GetAll<T>()
     {
         var sql = sqlBuilder.BuildGetAllSql(SchemaName, TableName);
-        await using var connection = CreateConnection();
+        using var connection = dbConnectionProvider.CreateConnection();
         
         return await connection.QueryAsync<T>(sql);
     }
     
-    public async Task<T> GetById<T>(Guid id) where T : BaseRecord
+    public virtual async Task<T> GetById<T>(Guid id) where T : BaseRecord
     {
         var sql = sqlBuilder.BuildGetByIdSql(SchemaName, TableName);
-        await using var connection = CreateConnection();
+        using var connection = dbConnectionProvider.CreateConnection();
         
         var record = await connection.QuerySingleOrDefaultAsync<T>(sql, new { id });
 
@@ -47,8 +36,8 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
 
     public async Task<T> Insert<T>(T record) where T : BaseRecord
     {
-        var sql = sqlBuilder.BuildInsertSql<T>(SchemaName, TableName, ["id"]);
-        await using var connection = CreateConnection();
+        var sql = sqlBuilder.BuildInsertSql<T>(SchemaName, TableName, [nameof(record.id)]);
+        using var connection = dbConnectionProvider.CreateConnection();
         
         var createdRecord = await connection.QueryFirstOrDefaultAsync<T>(sql, record);
 
@@ -62,8 +51,9 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
 
     public async Task<T> Update<T>(T record) where T : BaseRecord
     {
-        var sql = sqlBuilder.BuildSimpleUpdateSql<T>(SchemaName, TableName, ["id", "created_on", "is_deleted"]);
-        await using var connection = CreateConnection();
+        var sql = sqlBuilder.BuildSimpleUpdateSql<T>(SchemaName, TableName,
+            [nameof(record.id), nameof(record.created_on), nameof(record.is_deleted)]);
+        using var connection = dbConnectionProvider.CreateConnection();
         
         var updatedRecord = await connection.QueryFirstOrDefaultAsync<T>(sql, record);
         
@@ -78,7 +68,7 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
     public async Task<T> Delete<T>(Guid id) where T : BaseRecord
     {
         var sql = sqlBuilder.BuildSoftDeleteSql(SchemaName, TableName);
-        await using var connection = CreateConnection();
+        using var connection = dbConnectionProvider.CreateConnection();
         
         var deletedRecord = await connection.QueryFirstOrDefaultAsync<T>(sql, new { id, updated_on = DateTime.UtcNow });
         
@@ -90,14 +80,31 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder) : IBaseRepository
         return deletedRecord;
     }
 
-    private static NpgsqlConnection CreateConnection()
+    public async Task<T> MergeRecords<T>(T record, string[]? fieldsToIgnore = null) where T : BaseRecord, new()
     {
-        var connectionString = AppConfig.GetConnectionString();
-        Log.Debug("Creating Npgsql connection: {connectionString}", connectionString);
-        
-        var connection = new NpgsqlConnection(connectionString);
-        connection.Open();
-        
-        return connection;
+        T existingRecord;
+
+        try
+        {
+            existingRecord = await GetById<T>(record.id);
+        }
+        catch
+        {
+            return record;
+        }
+
+        var recordColumns =  typeof(T).GetProperties().Select(x => x.Name).Except(fieldsToIgnore ?? []).ToList();
+
+        var mergedRecord = new T();
+
+        foreach (var column in recordColumns)
+        {
+            var incomingValue = record.GetType().GetProperty(column)?.GetValue(record);
+            var existingValue = existingRecord.GetType().GetProperty(column)?.GetValue(existingRecord);
+            mergedRecord.GetType().GetProperty(column)?.SetValue(mergedRecord,
+                incomingValue != null || incomingValue as string != "" ? incomingValue : existingValue);
+        }
+
+        return mergedRecord;
     }
 }

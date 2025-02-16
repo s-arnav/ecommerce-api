@@ -1,6 +1,7 @@
 using Ecommerce.Services.Constants;
 using Ecommerce.Services.Records;
 using Ecommerce.Services.Utilities;
+using Ecommerce.Services.Utilities.Providers;
 
 namespace Ecommerce.Services.Repositories;
 
@@ -13,7 +14,8 @@ public interface ICategoryRepository
     Task<CategoryRecord> DeleteCategory(Guid id);
 }
 
-public class CategoryRepository(ISqlBuilder sqlBuilder) : BaseRepository(sqlBuilder), ICategoryRepository
+public class CategoryRepository(ISqlBuilder sqlBuilder, IDbConnectionProvider dbConnectionProvider)
+    : BaseRepository(sqlBuilder, dbConnectionProvider), ICategoryRepository
 {
     protected override string SchemaName => Schemas.Ops;
     protected override string TableName => OpsTables.Category;

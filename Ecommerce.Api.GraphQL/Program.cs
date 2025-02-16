@@ -28,6 +28,9 @@ graphQlServer.AddQueryType<Query>().AddTypeExtension<CategoryQueries>();
 // Add Mutations
 graphQlServer.AddMutationType<Mutation>().AddTypeExtension<CategoryMutations>();
 
+// Add Exception Handling
+graphQlServer.AddErrorFilter(error => error.WithMessage(error.Exception?.Message ?? "Unexpected Server Error"));
+
 var app = builder.Build();
 
 app.MapGraphQL();

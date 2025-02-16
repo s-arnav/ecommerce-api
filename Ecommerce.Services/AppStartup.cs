@@ -1,6 +1,7 @@
 using Ecommerce.Services.Repositories;
 using Ecommerce.Services.Services;
 using Ecommerce.Services.Utilities;
+using Ecommerce.Services.Utilities.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -12,6 +13,8 @@ public static class AppStartup
     {
         // services
         services.AddSingleton<ISqlBuilder, SqlBuilder>();
+        services.AddSingleton<IAppConfigService, AppConfigService>();
+        services.AddSingleton<IDbConnectionProvider, DbConnectionProvider>();
         services.AddSingleton<ICategoryService, CategoryService>();
         
         // repositories

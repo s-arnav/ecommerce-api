@@ -2,6 +2,7 @@ using Ecommerce.Api.Rest.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shouldly;
+using Xunit;
 
 namespace Ecommerce.Tests.TestExtensions;
 

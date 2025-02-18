@@ -1,6 +1,7 @@
 ﻿using FluentMigrator.Runner;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Ecommerce.DatabaseMigrations;
 
@@ -41,7 +42,7 @@ public class Program
     private static ServiceProvider CreateServices()
     {
         var connectionString = GetAppConfig().GetConnectionString("DbLocal");
-        Console.WriteLine("Connection String: {0}", connectionString);
+        Log.Information("Connection String: {connectionString}", connectionString);
         
         return new ServiceCollection()
             .AddFluentMigratorCore()

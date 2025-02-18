@@ -3,6 +3,7 @@ using Ecommerce.Services.Repositories;
 using Ecommerce.Services.Utilities;
 using Ecommerce.Services.Utilities.Providers;
 using Moq;
+using Xunit;
 
 namespace Ecommerce.Tests.Repositories;
 
@@ -22,7 +23,11 @@ public class BaseRepositoryTest
         dbConnectionProvider = mockRepository.Create<IDbConnectionProvider>();
         dbConnection = mockRepository.Create<IDbConnection>();
         baseRepository = new BaseRepositoryConcrete(sqlBuilder.Object, dbConnectionProvider.Object);
-        
+    }
+    
+    [Fact]
+    public void ShouldMergeRecords()
+    {
     }
 
     private class BaseRepositoryConcrete(ISqlBuilder sqlBuilder, IDbConnectionProvider connectionProvider)

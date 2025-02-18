@@ -37,7 +37,7 @@ public class CategoryService(ICategoryRepository categoryRepository) : ICategory
 
     public async Task<CategoryResponse> CreateCategory(CreateCategoryRequest category)
     {
-        category.ValidateCreateCategoryRequest();
+        category.Validate();
         
         var createdCategory = await categoryRepository.CreateCategory(category.ToCreateRecord());
         
@@ -46,7 +46,7 @@ public class CategoryService(ICategoryRepository categoryRepository) : ICategory
 
     public async Task<CategoryResponse> UpdateCategory(UpdateCategoryRequest category)
     {
-        category.ValidateUpdateCategoryRequest();
+        category.Validate();
         
         var updatedCategory = await categoryRepository.UpdateCategory(category.ToUpdateRecord());
         

@@ -6,6 +6,7 @@ using Ecommerce.Tests.Utilities.Samples;
 using Ecommerce.Tests.Utilities.Types;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Xunit;
 
 namespace Ecommerce.Tests.Controllers;
 
@@ -13,7 +14,7 @@ public class BaseApiControllerTest
 {
     private readonly BaseApiControllerConcrete baseApiController = new();
 
-    [Test]
+    [Fact]
     public async Task ExecuteReadOrUpdateAsyncShouldReturnOk()
     {
         var response = ResponseDtoSamples.TestResponse;
@@ -21,14 +22,14 @@ public class BaseApiControllerTest
         result.AssertSuccessResponse(response);
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteReadOrUpdateAsyncShouldFailWhenNotFound()
     {
         var result = await baseApiController.TestExecuteReadOrUpdateAsync<TestDto>(() => throw new RecordNotFoundException());
         result.AssertFailureResponse<TestDto>(StatusCodes.Status404NotFound);
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteCreateAsyncShouldReturnOk()
     {
         var response = ResponseDtoSamples.TestResponse;
@@ -36,7 +37,7 @@ public class BaseApiControllerTest
         result.AssertSuccessResponse(response);
     }
 
-    [Test]
+    [Fact]
     public async Task ExecuteCreateAsyncShouldFailWhenInvalidInput()
     {
         var result = await baseApiController.TestExecuteCreateAsync<TestDto>(
@@ -44,7 +45,7 @@ public class BaseApiControllerTest
         result.AssertFailureResponse<TestDto>(StatusCodes.Status400BadRequest);
     }
     
-    [Test]
+    [Fact]
     public async Task ExecuteCreateAsyncShouldFailWhenUnknownError()
     {
         var result = await baseApiController.TestExecuteCreateAsync<TestDto>(() => throw new Exception("Something went wrong"));

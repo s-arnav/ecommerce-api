@@ -57,7 +57,7 @@ public class Validation
     {
         if (value == Guid.Empty || !Guid.TryParse(value.ToString(), out var _))
         {
-            exceptions.Add(new ValidationException($"'{fieldName}' is not a valid Guid"));
+            exceptions.Add(new ValidationException($"'{fieldName}' is not a valid id"));
         }
 
         return this;

@@ -7,6 +7,7 @@ using Ecommerce.Tests.TestExtensions;
 using Ecommerce.Tests.Utilities.Samples;
 using Microsoft.AspNetCore.Http;
 using Moq;
+using Xunit;
 
 namespace Ecommerce.Tests.Controllers;
 
@@ -21,7 +22,7 @@ public class CategoryControllerTest : BaseControllerTest
         categoryController = new CategoryController(categoryService.Object);
     }
 
-    [Test]
+    [Fact]
     public async Task ShouldGetAllCategories()
     {
         var categories = ResponseDtoSamples.Categories();
@@ -33,7 +34,7 @@ public class CategoryControllerTest : BaseControllerTest
         response.AssertSuccessResponse<IEnumerable<CategoryResponse>>(categories);
     }
     
-    [Test]
+    [Fact]
     public async Task GetAllCategoriesFailWithResponseStatus500()
     {
         categoryService.Setup(x => x.GetAllCategories()).ThrowsAsync(new Exception("Something went wrong"));
@@ -43,7 +44,7 @@ public class CategoryControllerTest : BaseControllerTest
         response.AssertFailureResponse<IEnumerable<CategoryResponse>>(StatusCodes.Status500InternalServerError);
     }
 
-    [Test]
+    [Fact]
     public async Task ShouldGetCategoryById()
     {
         var categoryDto = ResponseDtoSamples.Category;
@@ -55,7 +56,7 @@ public class CategoryControllerTest : BaseControllerTest
         response.AssertSuccessResponse(categoryDto);
     }
     
-    [Test]
+    [Fact]
     public async Task GetCategoryByIdFailWhenNotFound()
     {
         var categoryId = Guid.NewGuid();
@@ -67,7 +68,7 @@ public class CategoryControllerTest : BaseControllerTest
         response.AssertFailureResponse<CategoryResponse>(StatusCodes.Status404NotFound);
     }
     
-    [Test]
+    [Fact]
     public async Task ShouldCreateCategory()
     {
         var request = RequestDtoSamples.CreateCategory;
@@ -80,7 +81,7 @@ public class CategoryControllerTest : BaseControllerTest
         response.AssertSuccessResponse(expectedResponse);
     }
     
-    [Test]
+    [Fact]
     public async Task CreateCategoryFailInvalidRequestBody()
     {
         var request = RequestDtoSamples.CreateCategory;
@@ -94,7 +95,7 @@ public class CategoryControllerTest : BaseControllerTest
         response.AssertFailureResponse<CategoryResponse>(StatusCodes.Status400BadRequest);
     }
     
-    [Test]
+    [Fact]
     public async Task ShouldUpdateCategory()
     {
         var request = RequestDtoSamples.UpdateCategory;
@@ -110,7 +111,7 @@ public class CategoryControllerTest : BaseControllerTest
         response.AssertSuccessResponse(expectedResponse);
     }
     
-    [Test]
+    [Fact]
     public async Task UpdateCategoryFailInvalidRequestBody()
     {
         var categoryDto = RequestDtoSamples.UpdateCategory;
@@ -124,7 +125,7 @@ public class CategoryControllerTest : BaseControllerTest
         response.AssertFailureResponse<CategoryResponse>(StatusCodes.Status404NotFound);
     }
     
-    [Test]
+    [Fact]
     public async Task ShouldDeleteCategory()
     {
         var categoryId = Guid.NewGuid();

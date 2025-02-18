@@ -2,7 +2,9 @@ using Dapper;
 using Ecommerce.Services.Records;
 using Ecommerce.Services.Utilities;
 using Ecommerce.Services.Utilities.Exceptions;
+using Ecommerce.Services.Utilities.Extensions.Generic;
 using Ecommerce.Services.Utilities.Providers;
+using Serilog;
 
 namespace Ecommerce.Services.Repositories;
 
@@ -11,7 +13,7 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder, IDbConnectionProvid
     protected virtual string SchemaName => "";
     protected virtual string TableName => "";
     
-    public async Task<IEnumerable<T>> GetAll<T>()
+    protected async Task<IEnumerable<T>> GetAll<T>()
     {
         var sql = sqlBuilder.BuildGetAllSql(SchemaName, TableName);
         using var connection = dbConnectionProvider.CreateConnection();
@@ -19,7 +21,7 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder, IDbConnectionProvid
         return await connection.QueryAsync<T>(sql);
     }
     
-    public virtual async Task<T> GetById<T>(Guid id) where T : BaseRecord
+    protected async Task<T> GetById<T>(Guid id) where T : BaseRecord
     {
         var sql = sqlBuilder.BuildGetByIdSql(SchemaName, TableName);
         using var connection = dbConnectionProvider.CreateConnection();
@@ -34,7 +36,7 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder, IDbConnectionProvid
         return record;
     }
 
-    public async Task<T> Insert<T>(T record) where T : BaseRecord
+    protected async Task<T> Insert<T>(T record) where T : BaseRecord
     {
         var sql = sqlBuilder.BuildInsertSql<T>(SchemaName, TableName, [nameof(record.id)]);
         using var connection = dbConnectionProvider.CreateConnection();
@@ -49,7 +51,7 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder, IDbConnectionProvid
         return createdRecord;
     }
 
-    public async Task<T> Update<T>(T record) where T : BaseRecord
+    protected async Task<T> Update<T>(T record) where T : BaseRecord, new()
     {
         var sql = sqlBuilder.BuildSimpleUpdateSql<T>(SchemaName, TableName,
             [nameof(record.id), nameof(record.created_on), nameof(record.is_deleted)]);
@@ -65,7 +67,7 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder, IDbConnectionProvid
         return updatedRecord;
     }
     
-    public async Task<T> Delete<T>(Guid id) where T : BaseRecord
+    protected async Task<T> Delete<T>(Guid id) where T : BaseRecord
     {
         var sql = sqlBuilder.BuildSoftDeleteSql(SchemaName, TableName);
         using var connection = dbConnectionProvider.CreateConnection();
@@ -80,22 +82,25 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder, IDbConnectionProvid
         return deletedRecord;
     }
 
-    public async Task<T> MergeRecords<T>(T record, string[]? fieldsToIgnore = null) where T : BaseRecord, new()
+    private async Task<T> MergeRecords<T>(T record, string[]? fieldsToIgnore = null) where T : BaseRecord, new()
     {
         T existingRecord;
 
         try
         {
             existingRecord = await GetById<T>(record.id);
+            Log.Debug("Existing: {existingRecord}", record.ToJson());
         }
         catch
         {
             return record;
         }
 
-        var recordColumns =  typeof(T).GetProperties().Select(x => x.Name).Except(fieldsToIgnore ?? []).ToList();
+        var recordColumns = typeof(T).GetProperties().Select(x => x.Name)
+            .Except(fieldsToIgnore ?? [nameof(record.id), nameof(record.created_on), nameof(record.is_deleted)])
+            .ToList();
 
-        var mergedRecord = new T();
+        var mergedRecord = new T { id = existingRecord.id, created_on = existingRecord.created_on, is_deleted = existingRecord.is_deleted };
 
         foreach (var column in recordColumns)
         {

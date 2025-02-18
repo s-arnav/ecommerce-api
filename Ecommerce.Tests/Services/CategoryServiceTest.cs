@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Ecommerce.Services.Records;
 using Ecommerce.Services.Repositories;
 using Ecommerce.Services.Services;
@@ -7,6 +6,7 @@ using Ecommerce.Services.Utilities.Extensions.Requests;
 using Ecommerce.Tests.Utilities.Samples;
 using Moq;
 using Shouldly;
+using Xunit;
 
 namespace Ecommerce.Tests.Services;
 
@@ -26,7 +26,7 @@ public class CategoryServiceTest : IDisposable
         categoryRepository.VerifyAll();
     }
 
-    [Test]
+    [Fact]
     public async Task ShouldGetAllCategories()
     {
         var records = RecordSamples.Categories();
@@ -38,7 +38,7 @@ public class CategoryServiceTest : IDisposable
         response.ShouldBeEquivalentTo(expectedResponse);
     }
 
-    [Test]
+    [Fact]
     public async Task ShouldGetCategory()
     {
         var id = Guid.NewGuid();
@@ -52,7 +52,7 @@ public class CategoryServiceTest : IDisposable
         response.ShouldBeEquivalentTo(expectedResponse);
     }
 
-    [Test]
+    [Fact]
     public async Task ShouldCreateCategory()
     {
         var request = RequestDtoSamples.CreateCategory;
@@ -66,9 +66,8 @@ public class CategoryServiceTest : IDisposable
         var response = await categoryService.CreateCategory(request);
         response.ShouldBeEquivalentTo(expectedResponse);
     }
-
-
-    [Test]
+    
+    [Fact]
     public async Task ShouldUpdateCategory()
     {
         var request = RequestDtoSamples.UpdateCategory;
@@ -83,7 +82,7 @@ public class CategoryServiceTest : IDisposable
         response.ShouldBeEquivalentTo(expectedResponse);
     }
 
-    [Test]
+    [Fact]
     public async Task ShouldDeleteCategory()
     {
         var request = Guid.NewGuid();

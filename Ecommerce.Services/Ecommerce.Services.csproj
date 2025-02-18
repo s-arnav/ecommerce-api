@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Tasks\" />
-    <Folder Include="Utilities\Config\" />
   </ItemGroup>
 
   <ItemGroup>

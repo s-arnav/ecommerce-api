@@ -12,13 +12,16 @@ public static class AppStartup
     public static void ConfigureServices(IServiceCollection services)
     {
         // services
-        services.AddSingleton<ISqlBuilder, SqlBuilder>();
-        services.AddSingleton<IAppConfigService, AppConfigService>();
-        services.AddSingleton<IDbConnectionProvider, DbConnectionProvider>();
-        services.AddSingleton<ICategoryService, CategoryService>();
+        services.AddTransient<ISqlBuilder, SqlBuilder>();
+        services.AddScoped<IAppConfigService, AppConfigService>();
+        services.AddScoped<IDbConnectionProvider, DbConnectionProvider>();
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IDbQueryService, DbQueryService>();
         
         // repositories
-        services.AddSingleton<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
     }
 
     public static void InitializeLogging()

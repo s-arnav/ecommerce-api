@@ -1,32 +1,32 @@
+using System.Data;
 using Ecommerce.Services.Constants;
 using Ecommerce.Services.Records;
 using Ecommerce.Services.Utilities;
-using Ecommerce.Services.Utilities.Providers;
 
 namespace Ecommerce.Services.Repositories;
 
 public interface ICategoryRepository
 {
-    Task<IEnumerable<CategoryRecord>> GetAllCategories();
-    Task<CategoryRecord> GetCategoryById(Guid id);
-    Task<CategoryRecord> CreateCategory(CategoryRecord category);
-    Task<CategoryRecord> UpdateCategory(CategoryRecord categoryRecord);
-    Task<CategoryRecord> DeleteCategory(Guid id);
+    Task<IEnumerable<CategoryRecord>> GetAllCategories(IDbConnection connection);
+    Task<CategoryRecord> GetCategoryById(Guid id, IDbConnection connection);
+    Task<CategoryRecord> CreateCategory(CategoryRecord categoryRecord, IDbConnection connection);
+    Task<CategoryRecord> UpdateCategory(CategoryRecord categoryRecord, IDbConnection connection);
+    Task<CategoryRecord> DeleteCategory(Guid id, IDbConnection connection);
 }
 
-public class CategoryRepository(ISqlBuilder sqlBuilder, IDbConnectionProvider dbConnectionProvider)
-    : BaseRepository(sqlBuilder, dbConnectionProvider), ICategoryRepository
+public class CategoryRepository(ISqlBuilder sqlBuilder, IDbQueryService dbQueryService)
+    : BaseRepository(sqlBuilder, dbQueryService), ICategoryRepository
 {
     protected override string SchemaName => Schemas.Ops;
     protected override string TableName => OpsTables.Category;
 
-    public async Task<IEnumerable<CategoryRecord>> GetAllCategories() => await GetAll<CategoryRecord>();
+    public async Task<IEnumerable<CategoryRecord>> GetAllCategories(IDbConnection connection) => await GetAll<CategoryRecord>(connection);
 
-    public async Task<CategoryRecord> GetCategoryById(Guid id) => await GetById<CategoryRecord>(id);
+    public async Task<CategoryRecord> GetCategoryById(Guid id, IDbConnection connection) => await GetById<CategoryRecord>(id, connection);
 
-    public async Task<CategoryRecord> CreateCategory(CategoryRecord categoryRecord) => await Insert(categoryRecord);
+    public async Task<CategoryRecord> CreateCategory(CategoryRecord categoryRecord, IDbConnection connection) => await Insert(categoryRecord, connection);
 
-    public async Task<CategoryRecord> UpdateCategory(CategoryRecord categoryRecord) => await Update(categoryRecord);
+    public async Task<CategoryRecord> UpdateCategory(CategoryRecord categoryRecord, IDbConnection connection) => await Update(categoryRecord, connection);
     
-    public async Task<CategoryRecord> DeleteCategory(Guid id) => await Delete<CategoryRecord>(id);
+    public async Task<CategoryRecord> DeleteCategory(Guid id, IDbConnection connection) => await Delete<CategoryRecord>(id, connection);
 }

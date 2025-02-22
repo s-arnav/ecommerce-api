@@ -1,94 +1,88 @@
-using Dapper;
+using System.Data;
 using Ecommerce.Services.Records;
 using Ecommerce.Services.Utilities;
 using Ecommerce.Services.Utilities.Exceptions;
 using Ecommerce.Services.Utilities.Extensions.Generic;
-using Ecommerce.Services.Utilities.Providers;
 using Serilog;
 
 namespace Ecommerce.Services.Repositories;
 
-public abstract class BaseRepository(ISqlBuilder sqlBuilder, IDbConnectionProvider dbConnectionProvider)
+public abstract class BaseRepository(ISqlBuilder sqlBuilder, IDbQueryService dbQueryService)
 {
     protected virtual string SchemaName => "";
     protected virtual string TableName => "";
     
-    protected async Task<IEnumerable<T>> GetAll<T>()
+    protected async Task<IEnumerable<T>> GetAll<T>(IDbConnection connection)
     {
         var sql = sqlBuilder.BuildGetAllSql(SchemaName, TableName);
-        using var connection = dbConnectionProvider.CreateConnection();
-        
-        return await connection.QueryAsync<T>(sql);
+
+        return await dbQueryService.QueryAsync<T>(sql, new {}, connection);
     }
     
-    protected async Task<T> GetById<T>(Guid id) where T : BaseRecord
+    protected async Task<T> GetById<T>(Guid id, IDbConnection connection) where T : BaseRecord
     {
         var sql = sqlBuilder.BuildGetByIdSql(SchemaName, TableName);
-        using var connection = dbConnectionProvider.CreateConnection();
         
-        var record = await connection.QuerySingleOrDefaultAsync<T>(sql, new { id });
+        var record = await dbQueryService.QuerySingleOrDefaultAsync<T>(sql, new { id }, connection);
 
         if (record == null)
         {
-            throw new RecordNotFoundException($"No record found for id: '{id}'");
+            throw new RecordNotFoundException($"{typeof(T).Name}: No record found for id: '{id}'");
         }
         
         return record;
     }
 
-    protected async Task<T> Insert<T>(T record) where T : BaseRecord
+    protected async Task<T> Insert<T>(T record, IDbConnection connection) where T : BaseRecord
     {
         var sql = sqlBuilder.BuildInsertSql<T>(SchemaName, TableName, [nameof(record.id)]);
-        using var connection = dbConnectionProvider.CreateConnection();
-        
-        var createdRecord = await connection.QueryFirstOrDefaultAsync<T>(sql, record);
+
+        var createdRecord = await dbQueryService.QuerySingleOrDefaultAsync<T>(sql, record, connection);
 
         if (createdRecord == null)
         {
-            throw new Exception("Record not inserted");
+            throw new Exception($"{typeof(T).Name}: Record not inserted");
         }
         
         return createdRecord;
     }
 
-    protected async Task<T> Update<T>(T record) where T : BaseRecord, new()
+    protected async Task<T> Update<T>(T record, IDbConnection connection) where T : BaseRecord, new()
     {
         var sql = sqlBuilder.BuildSimpleUpdateSql<T>(SchemaName, TableName,
             [nameof(record.id), nameof(record.created_on), nameof(record.is_deleted)]);
-        using var connection = dbConnectionProvider.CreateConnection();
-        
-        var updatedRecord = await connection.QueryFirstOrDefaultAsync<T>(sql, record);
+
+        var updatedRecord = await dbQueryService.QuerySingleOrDefaultAsync<T>(sql, record, connection);
         
         if (updatedRecord == null)
         {
-            throw new RecordNotFoundException($"No record found for id: '{record.id}'");
+            throw new RecordNotFoundException($"{typeof(T).Name}: No record found for id: '{record.id}'");
         }
         
         return updatedRecord;
     }
     
-    protected async Task<T> Delete<T>(Guid id) where T : BaseRecord
+    protected async Task<T> Delete<T>(Guid id, IDbConnection connection) where T : BaseRecord
     {
         var sql = sqlBuilder.BuildSoftDeleteSql(SchemaName, TableName);
-        using var connection = dbConnectionProvider.CreateConnection();
-        
-        var deletedRecord = await connection.QueryFirstOrDefaultAsync<T>(sql, new { id, updated_on = DateTime.UtcNow });
+
+        var deletedRecord = await dbQueryService.QuerySingleOrDefaultAsync<T>(sql, new { id, updated_on = DateTime.UtcNow }, connection);
         
         if (deletedRecord == null)
         {
-            throw new Exception($"No record found for id: '{id}'");
+            throw new RecordNotFoundException($"{typeof(T).Name}: No record found for id: '{id}'");
         }
         
         return deletedRecord;
     }
-
-    private async Task<T> MergeRecords<T>(T record, string[]? fieldsToIgnore = null) where T : BaseRecord, new()
+    
+    private async Task<T> MergeRecords<T>(T record, IDbConnection connection, string[]? fieldsToIgnore = null) where T : BaseRecord, new()
     {
         T existingRecord;
 
         try
         {
-            existingRecord = await GetById<T>(record.id);
+            existingRecord = await GetById<T>(record.id, connection);
             Log.Debug("Existing: {existingRecord}", record.ToJson());
         }
         catch
@@ -112,4 +106,10 @@ public abstract class BaseRepository(ISqlBuilder sqlBuilder, IDbConnectionProvid
 
         return mergedRecord;
     }
+    
+    protected async Task<IEnumerable<T>> QueryAsync<T>(string sql, object param, IDbConnection connection)
+        => await dbQueryService.QueryAsync<T>(sql, param, connection);
+    
+    protected async Task<T?> QuerySingleOrDefaultAsync<T>(string sql, object param, IDbConnection connection)
+        => await dbQueryService.QuerySingleOrDefaultAsync<T>(sql, param, connection);
 }

@@ -13,4 +13,7 @@ public static class CategoryRecordExtensions
             Description = categoryRecord.description,
             IsActive = categoryRecord.is_active
         };
+
+    public static IEnumerable<CategoryResponse> ToResponse(this IEnumerable<CategoryRecord> categoryRecords)
+        => categoryRecords.Select(c => c.ToResponse());
 }

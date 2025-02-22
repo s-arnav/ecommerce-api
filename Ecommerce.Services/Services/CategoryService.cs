@@ -4,6 +4,7 @@ using Ecommerce.Services.ResponseDtos;
 using Ecommerce.Services.Utilities.Extensions.Records;
 using Ecommerce.Services.Utilities.Extensions.Requests;
 using Ecommerce.Services.Utilities.Extensions.Validations;
+using Ecommerce.Services.Utilities.Providers;
 using Ecommerce.Services.Utilities.Validations;
 
 namespace Ecommerce.Services.Services;
@@ -17,20 +18,22 @@ public interface ICategoryService
     Task<CategoryResponse> DeleteCategory(Guid id);
 }
 
-public class CategoryService(ICategoryRepository categoryRepository) : ICategoryService
+public class CategoryService(ICategoryRepository categoryRepository, IDbConnectionProvider dbConnectionProvider) : ICategoryService
 {
     public async Task<IEnumerable<CategoryResponse>> GetAllCategories()
     {
-        var categories = await categoryRepository.GetAllCategories();
+        var connection = dbConnectionProvider.CreateConnection();
+        var categories = await categoryRepository.GetAllCategories(connection);
 
-        return categories.Select(category => category.ToResponse());
+        return categories.ToResponse();
     }
     
     public async Task<CategoryResponse> GetCategoryById(Guid id)
     {
         Validation.Begin().IsValidId(id, nameof(id));
         
-        var category = await categoryRepository.GetCategoryById(id);
+        var connection = dbConnectionProvider.CreateConnection();
+        var category = await categoryRepository.GetCategoryById(id, connection);
         
         return category.ToResponse();
     }
@@ -39,7 +42,8 @@ public class CategoryService(ICategoryRepository categoryRepository) : ICategory
     {
         category.Validate();
         
-        var createdCategory = await categoryRepository.CreateCategory(category.ToCreateRecord());
+        var connection = dbConnectionProvider.CreateConnection();
+        var createdCategory = await categoryRepository.CreateCategory(category.ToCreateRecord(), connection);
         
         return createdCategory.ToResponse();
     }
@@ -48,7 +52,8 @@ public class CategoryService(ICategoryRepository categoryRepository) : ICategory
     {
         category.Validate();
         
-        var updatedCategory = await categoryRepository.UpdateCategory(category.ToUpdateRecord());
+        var connection = dbConnectionProvider.CreateConnection();
+        var updatedCategory = await categoryRepository.UpdateCategory(category.ToUpdateRecord(), connection);
         
         return updatedCategory.ToResponse();
     }
@@ -57,7 +62,8 @@ public class CategoryService(ICategoryRepository categoryRepository) : ICategory
     {
         Validation.Begin().IsValidId(id, nameof(id)).Check();
         
-        var deletedCategory = await categoryRepository.DeleteCategory(id);
+        var connection = dbConnectionProvider.CreateConnection();
+        var deletedCategory = await categoryRepository.DeleteCategory(id, connection);
 
         return deletedCategory.ToResponse();
     }

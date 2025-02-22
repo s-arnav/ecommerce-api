@@ -62,4 +62,24 @@ public class Validation
 
         return this;
     }
+
+    public Validation IsMinValue(int value, int minValue, string fieldName)
+    {
+        if (value < minValue)
+        {
+            exceptions.Add(new ValidationException($"'{fieldName}' is less than {minValue}"));
+        }
+
+        return this;
+    }
+    
+    public Validation IsMinValue(decimal value, decimal minValue, string fieldName)
+    {
+        if (value < minValue)
+        {
+            exceptions.Add(new ValidationException($"'{fieldName}' is less than {minValue}"));
+        }
+    
+        return this;
+    }
 }

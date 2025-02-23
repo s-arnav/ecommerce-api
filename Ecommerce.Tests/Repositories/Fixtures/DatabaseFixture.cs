@@ -1,7 +1,6 @@
 using System.Reflection;
 using FluentMigrator.Runner;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -18,7 +17,6 @@ public class DatabaseFixture : IAsyncLifetime
         await postgreSqlContainer.StartAsync();
         ConnectionString = postgreSqlContainer.GetConnectionString();
         RunMigrations(ConnectionString);
-        Log.Information("{connectionString}", postgreSqlContainer.Id);
     }
     
     public ValueTask DisposeAsync() => postgreSqlContainer.DisposeAsync();

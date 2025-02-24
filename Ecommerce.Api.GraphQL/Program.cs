@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Text.Json;
 using Ecommerce.Api.GraphQL.Mutations;
 using Ecommerce.Api.GraphQL.Queries;
 using Ecommerce.Services.Utilities.Extensions.Generic;
@@ -22,10 +21,14 @@ Log.Debug("Mutation types in this assembly: {types}", Assembly.GetExecutingAssem
         .Select(type => type.Name).ToJson());
 
 // Add Queries
-graphQlServer.AddQueryType<Query>().AddTypeExtension<CategoryQueries>();
+graphQlServer.AddQueryType<Query>()
+        .AddTypeExtension<CategoryQueries>()
+        .AddTypeExtension<ProductQueries>();
 
 // Add Mutations
-graphQlServer.AddMutationType<Mutation>().AddTypeExtension<CategoryMutations>();
+graphQlServer.AddMutationType<Mutation>()
+        .AddTypeExtension<CategoryMutations>()
+        .AddTypeExtension<ProductMutations>();
 
 // Add Exception Handling
 graphQlServer.AddErrorFilter(error => error.WithMessage(error.Exception?.Message ?? "Unexpected Server Error"));
